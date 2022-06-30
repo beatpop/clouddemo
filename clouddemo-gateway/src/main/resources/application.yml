@@ -1,0 +1,48 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: CLOUDDEMO-GATEWAY
+  main:
+    allow-circular-references: true
+  cloud:
+    nacos:
+      server-addr: 127.0.0.1:8848
+    # sentinel 限流熔断
+    sentinel:
+      transport:
+        port: 8721
+        dashboard: 127.0.0.1:8098
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: CLOUDDEMO-PROVIDER
+          # 采用 LoadBalanceClient 方式
+          uri: lb://CLOUDDEMO-PROVIDER
+          predicates:
+            - Method=GET,POST,PUT,DELETE
+
+        - id: CLOUDDEMO-CONSUMER
+          uri: lb://CLOUDDEMO-CONSUMER
+          predicates:
+            - Method=GET,POST,PUT,DELETE
+
+feign:
+  sentinel:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+    jmx:
+      exposure:
+        include: "*"
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
